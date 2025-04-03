@@ -3,13 +3,26 @@
   --baseAlt1Color: #e3e8ed;
   --baseAlt2Color: #d7dde3;
   --baseAlt3Color: #c9d0da;
+  --baseAnimationSpeed: .15s;
   --baseColor: #ffffff;
+  --baseFontSize: 14.5px;
   --baseRadius: 4px;
+  --baseSpacing: 30px;
+  --btnHeight: 40px;
+  --btnRadius: 4px;
   --bodyColor: #f8f9fa;
+  --fontSizeSm: 13px;
+  --hPadding: 15px;
+  --inputHeight: 34px;
+  --lgBtnHeight: 54px;
+  --lgFontSize: 15px;
+  --smWrapperWidth: 420px;
+  --primaryColor: #1a1a24;
   --shadowColor: rgba(0, 0, 0, .06);
   --txtDisabledColor: #a0a6ac;
   --txtHintColor: #617079;
   --txtPrimaryColor: #1a1a24;
+  --wrapperWidth: 850px;
   --xlFontSize: 1rem;
 }
 
@@ -63,6 +76,63 @@ header, main, footer {
   width: 10px;
 }
 
+.btn {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  vertical-align: top;
+  align-items: center;
+  justify-content: center;
+  outline: 0;
+  border: 0;
+  margin: 0;
+  cursor: pointer;
+  padding: 5px 20px;
+  column-gap: 7px;
+  user-select: none;
+  min-width: var(--btnHeight);
+  min-height: var(--btnHeight);
+  text-align: center;
+  text-decoration: none;
+  line-height: 1;
+  font-weight: 600;
+  color: #fff;
+  font-size: var(--baseFontSize);
+  font-family: var(--baseFontFamily);
+  border-radius: var(--btnRadius);
+  background: none;
+  transition: color var(--baseAnimationSpeed);
+} 
+
+.btn:before {
+  content: "";
+  border-radius: inherit;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+  backface-visibility: hidden;
+  background: var(--primaryColor);
+  transition: filter var(--baseAnimationSpeed), opacity var(--baseAnimationSpeed), transform var(--baseAnimationSpeed), background var(--baseAnimationSpeed);
+}
+
+.btn.btn-lg {
+  column-gap: 10px;
+  font-size: var(--lgFontSize);
+  min-height: var(--lgBtnHeight);
+  min-width: var(--lgBtnHeight);
+} 
+
+.btn.btn-block {
+  display: flex;
+  width: 100%;
+} 
+
 .btn-hover-typ:hover {
   border-radius: var(--baseRadius);
   color: var(--txtPrimaryColor);
@@ -71,6 +141,52 @@ header, main, footer {
 
 .control-icon {
   width: 1.5rem;
+}
+
+.form-field {
+  margin-bottom: var(--baseSpacing);
+}
+
+.form-field label {
+  background: var(--baseAlt1Color);
+  border: 0;
+  border-top-left-radius: var(--baseRadius);
+  border-top-right-radius: var(--baseRadius);
+  color: var(--txtHintColor);
+  display: flex;
+  font-weight: 600;
+  font-size: var(--fontSizeSm);
+  padding-top: 12px;
+  padding-bottom: 3px;
+  padding-left: var(--hPadding);
+  padding-right: var(--hPadding);
+  transition: color var(--baseAnimationSpeed), background var(--baseAnimationSpeed);
+  width: 100%;
+}
+
+.form-field input {
+  outline: 0;
+  border: 0;
+  margin: 0;
+  background: var(--baseAlt1Color);;
+  border-bottom-left-radius: var(--baseRadius);
+  border-bottom-right-radius: var(--baseRadius);
+  min-height: 34px;
+  padding-top: 2px;
+  padding-bottom: 8px;
+  padding-left: var(--hPadding);
+  padding-right: var(--hPadding);
+  transition: color var(--baseAnimationSpeed), background var(--baseAnimationSpeed);
+  width: 100%;
+}
+
+.form-field input:focus {
+  background: var(--baseAlt2Color);
+}
+
+.form-field:focus-within label {
+  color: var(--txtPrimaryColor);
+  background: var(--baseAlt2Color);
 }
 
 .stat-confirmed-svg {
@@ -153,4 +269,15 @@ header, main, footer {
   background-color: var(--baseAlt1Color);
   border-radius: var(--baseRadius);
   color: var(--txtPrimaryColor);
+}
+
+.wrapper {
+  position: relative;
+  width: var(--wrapperWidth);
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+.wrapper.wrapper-sm {
+  width: var(--smWrapperWidth);
 }

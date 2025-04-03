@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { currentUser, pb } from './pocketbase';
+  import { pb } from './pocketbase';
 
   let name: string;
   let password: string;
@@ -34,23 +34,31 @@
   }
 
 </script>
-
+<div class="wrapper wrapper-sm">
   {#if currentView === 'login'}
-  <form class="flex flex-col w-33 m-0-auto">
-    <input 
-      class="p-1 m-1"
-      placeholder="Email"
-      type="email"
-      bind:value={email}
-    />
-    <input 
-      class="p-1 m-1"
-      placeholder="Password"
-      type="password"
-      bind:value={password}
-    />
+  <form class="">
+    <div class="form-field required">
+      <label for="email">
+        Email
+      </label>
+      <input 
+        type="email"
+        id="email"
+        bind:value={email}
+      />
+    </div>
+    <div class="form-field required">
+      <label for="password">
+        Password
+      </label>
+      <input 
+        type="password"
+        id="password"
+        bind:value={password}
+      />
+    </div>
     <button 
-      class="m-1 p-1"
+      class="btn btn-lg btn-block btn-next"
       onclick={(e) => login(e)}>Login
     </button>
     <button class="m-1" 
@@ -59,29 +67,36 @@
   </form>
   {/if}
   {#if currentView === 'signup'}
-  <form class="flex flex-col w-33 m-0-auto">
-    <input 
-      class="p-1 m-1"
-      placeholder="Name"
-      type="text"
-      bind:value={name}
-    />
-    <input 
-      class="p-1 m-1"
-      placeholder="Email"
-      type="email"
-      bind:value={email}
-    />
-    <input 
-      class="p-1 m-1"
-      placeholder="Password"
-      type="password"
-      bind:value={password}
-    />
+  <form class="wrapper wrapper-sm justify-center grid-area-all flex flex-col">
+    <div class="form-field required">
+      <label for="name">Name</label>
+      <input 
+        type="text"
+        id="name"
+        bind:value={name}
+      />
+    </div>
+    <div class="form-field required">
+      <label for="email">Email</label>
+      <input 
+        type="email"
+        id="email"
+        bind:value={email}
+      />
+    </div>
+    <div class="form-field required">
+      <label for="password">Password</label>
+      <input 
+        type="password"
+        id="password"
+        bind:value={password}
+      />
+    </div>
     <button 
-      class="m-1 p-1"
+      class="btn btn-lg btn-block btn-next"
       onclick={(e) => signUp(e)}>Sign Up
     </button>
     <button class="m-1" onclick={() => changeView("login")}>Do you need to login?</button>
   </form>
   {/if}
+</div>
