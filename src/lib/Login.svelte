@@ -1,11 +1,15 @@
 <script lang="ts">
   import { pb } from './pocketbase';
 
-  let name: string;
-  let password: string;
-  let email: string;
+  let name = $state('');
+  let password = $state('');
+  let email = $state('');
 
-  let currentView = 'login';
+  let currentView = $state('login');
+  let response = $state({
+    status: null, 
+    message: null
+  })
 
   function changeView(newView) {
     currentView = newView;
@@ -13,7 +17,12 @@
 
   async function login(e) {
     e.preventDefault();
-    await pb.collection('users').authWithPassword(email, password);
+    try {
+      const login = await pb.collection('users').authWithPassword(email, password);
+    } catch (err) {
+      response.status = "error"
+      response.message = "Please try again"
+    }
   }
 
   async function signUp(e) {
@@ -29,7 +38,8 @@
       const createdUser = await pb.collection('users').create(data);
       await login(e);
     } catch (err) {
-      console.log(err)
+      response.status = "error"
+      response.message = "Please try again"
     }
   }
 
@@ -64,6 +74,12 @@
     <button class="m-1" 
       onclick={() => changeView("signup")}>Do you need to signup?
     </button>
+    {#if response.status === "success"}
+    <div>{response.message}</div>
+    {/if}
+    {#if response.status === "error"}
+      <div>{response.message}</div>
+    {/if}
   </form>
   {/if}
   {#if currentView === 'signup'}
@@ -97,6 +113,12 @@
       onclick={(e) => signUp(e)}>Sign Up
     </button>
     <button class="m-1" onclick={() => changeView("login")}>Do you need to login?</button>
+    {#if response.status === "success"}
+      <div>{response.message}</div>
+    {/if}
+    {#if response.status === "error"}
+      <div>{response.message}</div>
+    {/if}
   </form>
   {/if}
 </div>
