@@ -203,6 +203,10 @@ header, main, footer {
   border: 2px solid var(--baseAlt3Color);
 }
 
+.table-standard input:disabled {
+  background: var(--baseAlt3Color);
+}
+
 .table-standard.vertical thead {
   position: sticky;
   top: 0px;
