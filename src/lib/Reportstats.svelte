@@ -1,18 +1,41 @@
 <script lang="ts">
-    import { onMount, onDestroy } from 'svelte';
+    import { onMount } from 'svelte';
     import { currentUser, pb } from './pocketbase';
 
     let weekEnding = $state({});
+    let weekEndingList = $state([]);
+
     let organizations = $state([]);
     let statisticFigures = $state([]);
     let statistics = $state([]);
     let currentView = $state('organizations');
 
+    let entityId = $state('');
+    let organizationId = $state('');
+
     let attestIsDone = $state(false);
-    let response = $state({ 
-      status: null, 
-      message: null
-    });
+    let response = $state({ status: null, message: null });
+
+    let debouncedSaveItem; // Declare debouncedSaveItem outside the function
+
+    function changeView(view, entity, organization) {
+      currentView = view;
+      entityId = entity;
+      organizationId = organization
+      if(view === 'input') {
+        loadStats();
+      }
+    }
+
+    function selectWeekEnding(e) {
+      for(let i = 0; i < weekEndingList.length; i++) {
+        if(e.target.value == weekEndingList[i].id) {
+          weekEnding = weekEndingList[i];
+          loadStats();
+          break;
+        }
+      }
+    }
 
     async function submitStatReport(e) {
       e.preventDefault();
@@ -35,20 +58,15 @@
       }
     }
 
-    function sortArray(array) {
-      array.sort((a, b) => {
-        if (a.expand.statistic.division > b.expand.statistic.division) return 1;
-        if (a.expand.statistic.division < b.expand.statistic.division) return -1;
-        return 0;
-      });
-      return array
+    async function saveItem(e) {
+      const data = {
+        "value": e.target.value,
+      };
+      const record = await pb.collection('Statistic_Figures').update(id, data);
     }
 
-    async function changeView(view, entityId, organizationId) {
-      // Remove the data loading function from this change view
-      currentView = view;
-      if(view === 'input') {
-        const statisticsList = await pb.collection('Statistics').getList(1, 50, {
+    async function loadStats() {
+      const statisticsList = await pb.collection('Statistics').getList(1, 50, {
           filter: `entity.id="${entityId}"`
         });
         statistics = statisticsList.items;
@@ -86,25 +104,14 @@
           expand: 'statistic',
         });
         statisticFigures = sortArray(statisticsFiguresListNew.items);
-
-        
-      }
     }
 
-    let debouncedSaveItem; // Declare debouncedSaveItem outside the function
-
+    
     function handleInputChange(e, id) {
       if (!debouncedSaveItem) {
         debouncedSaveItem = debounce(saveItem, 100); // Create it only once
       }
       debouncedSaveItem(e, id); // Call the debounced function
-    }
-
-    async function saveItem(e) {
-      const data = {
-        "value": e.target.value,
-      };
-      const record = await pb.collection('Statistic_Figures').update(id, data);
     }
 
     function debounce(func, delay) {
@@ -119,19 +126,36 @@
       }
     } 
 
-    onMount(async () => {
+    function sortArray(array) {
+      array.sort((a, b) => {
+        if (a.expand.statistic.division > b.expand.statistic.division) return 1;
+        if (a.expand.statistic.division < b.expand.statistic.division) return -1;
+        return 0;
+      });
+      return array
+    }
+
+    async function weekEndingCalc() {
       let d = new Date();
       d.setDate(d.getDate() + (4 + 7 - d.getDay()) % 7);
       d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
       const thursday = d.toISOString().slice(0, 10);
+      return thursday;
+    }
+
+    onMount(async () => {
+      const thursday = await weekEndingCalc();
       try {
         const weekending = await pb.collection('Week_ending_date').getFirstListItem(`date="${thursday}"`);
         weekEnding = weekending;
       } catch {
-        const date = { "date": thursday }
-        const weekending = await pb.collection('Week_ending_date').create(date)
+        const weekending = await pb.collection('Week_ending_date').create({ "date": thursday })
         weekEnding = weekending;
       }
+      const allWeekEndings = await pb.collection('Week_ending_date').getList(1, 50, {
+        sort: `-date`
+      });
+      weekEndingList = allWeekEndings.items;
       const organizationList = await pb.collection('Organizations').getList(1, 50, {
         filter: `users.id="${$currentUser.id}"`, 
         expand: 'address_country, entity'
@@ -150,7 +174,15 @@
   </div>
 {:else if currentView === 'input'}
   <div class="flex justify-between">
-    Week Ending: {weekEnding.date} 
+    <div class="flex align-items-center gap-1">
+    Week Ending:
+      <select 
+        onchange={(e) => selectWeekEnding(e)}>
+      {#each weekEndingList as we} 
+        <option value={we.id}>{we.date}</option>
+      {/each}
+      </select>
+    </div>
     <button 
     class="pointer p-1 background-unset border-unset btn-hover-typ"
     onclick={() => changeView('organizations', null, null)}>Return to: Organizations</button>
@@ -175,7 +207,7 @@
       <td>
       <input 
         oninput={(e) => handleInputChange(e, statFig.id)}
-        type="number" class="p-1" value={statFig.value} />
+        type="number" class="p-1" value={statFig.value} disabled={statFig.confirmed}/>
       </td>
       <td>
       {#if !statFig.confirmed}
@@ -193,7 +225,7 @@
       <td></td>
       <td></td>
       <td></td>
-      <td><label>I attest this is completed
+      <td><label>I attest this is complete
         <input bind:checked={attestIsDone} type="checkbox" />
       </label>
       {#if attestIsDone}

@@ -1,6 +1,6 @@
 <script lang="ts">
   import Login from "./lib/Login.svelte";
-  import Statisticsform from "./lib/Statisticsform.svelte";
+  import Reportstats from "./lib/Reportstats.svelte";
   import Administerstats from "./lib/Administerstats.svelte";
   import { currentUser, pb } from "./lib/pocketbase";
   import Statisticsroundup from "./lib/Statisticsroundup.svelte";
@@ -89,7 +89,7 @@
   </aside>
   <main class="grid-area-main overflow-auto">
     {#if currentView === "statcable"}
-      <Statisticsform />
+      <Reportstats />
     {/if}
     {#if currentView === "informationcenter"}
       <OrgInfoCenter />

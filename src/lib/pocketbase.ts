@@ -6,7 +6,6 @@ export const pb = new PocketBase('https://dashboard.sbcdevsite.org');
 
 export const currentUser = writable(pb.authStore.record);
 
-pb.authStore.onChange((auth) => {
-  console.log('authStore changed', auth)
+pb.authStore.onChange(() => {
   currentUser.set(pb.authStore.record);
 });

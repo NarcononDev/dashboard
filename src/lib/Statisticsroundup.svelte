@@ -2,29 +2,52 @@
   import { onMount } from 'svelte';
   import { pb } from './pocketbase';
   
-  let weekEnding = $state({});
+  
 
   let entities = $state([]);
   let organizations = $state([]);
   let selectedEntity = $state('');  
   let statisticFigures = $state([]);
   let statistics = $state([]);
+  
+  let weekEnding = $state({});
+  let weekEndingList = $state([]);
+
+  async function weekEndingCalc() {
+    let d = new Date();
+    d.setDate(d.getDate() + (4 + 7 - d.getDay()) % 7);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    const thursday = d.toISOString().slice(0, 10);
+    return thursday;
+  }
+
+  function selectWeekEnding(e) {
+    for(let i = 0; i < weekEndingList.length; i++) {
+      if(e.target.value == weekEndingList[i].id) {
+        weekEnding = weekEndingList[i];
+        getStatReport();
+        break;
+      }
+    }
+  }
 
   onMount(async () => {
     const entityList = await pb.collection('Entity').getList(1, 50, {});
     entities = entityList.items
-    let d = new Date();
-      d.setDate(d.getDate() + (4 + 7 - d.getDay()) % 7);
-      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-      const thursday = d.toISOString().slice(0, 10);
-      try {
-        const weekending = await pb.collection('Week_ending_date').getFirstListItem(`date="${thursday}"`);
-        weekEnding = weekending;
-      } catch {
-        const date = { "date": thursday }
-        const weekending = await pb.collection('Week_ending_date').create(date)
-        weekEnding = weekending;
-      }
+
+    const thursday = await weekEndingCalc();
+    try {
+      const weekending = await pb.collection('Week_ending_date').getFirstListItem(`date="${thursday}"`);
+      weekEnding = weekending;
+    } catch {
+      const weekending = await pb.collection('Week_ending_date').create({ "date": thursday })
+      weekEnding = weekending;
+    }
+
+    const allWeekEndings = await pb.collection('Week_ending_date').getList(1, 50, {
+      sort: `-date`
+    });
+    weekEndingList = allWeekEndings.items;
   })
   async function getOrganizations(e) {
     selectedEntity = e.target.value
@@ -112,8 +135,14 @@
       <option value={entity.id}>{entity.name}</option>
     {/each}
   </select></label>
-  <div class="flex flex-col my-1">
-    Week Ending: {weekEnding.date} 
+  <div class="flex align-items-center gap-1">
+    Week Ending:
+    <select 
+      onchange={(e) => selectWeekEnding(e)}>
+    {#each weekEndingList as we} 
+      <option value={we.id}>{we.date}</option>
+    {/each}
+    </select>
   </div>
 </div>
 {#if organizations.length != 0}
